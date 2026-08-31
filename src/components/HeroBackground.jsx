@@ -106,15 +106,8 @@ function Particles({ count = 300 }) {
   )
 }
 
-export default function HeroBackground({ active }) {
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    const t = setTimeout(() => setReady(true), 300)
-    return () => clearTimeout(t)
-  }, [])
-
-  // Performance: render stars/camera drift
+// Scene rendered inside the Canvas (can safely use R3F hooks like useFrame)
+function Scene({ active }) {
   const groupRef = useRef()
 
   useFrame(({ pointer, camera }) => {
@@ -130,9 +123,46 @@ export default function HeroBackground({ active }) {
         0.04,
       )
     }
-    // subtle camera depth breathing
     camera.position.z = THREE.MathUtils.lerp(camera.position.z, 7, 0.01)
   })
+
+  return (
+    <>
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 8, 5]} intensity={1.2} />
+      <pointLight position={[-5, -4, 2]} intensity={1} color="#1E6FEB" />
+      <group ref={groupRef}>
+        <Blob
+          position={[-4, 0.5, -2]}
+          color="#1E6FEB"
+          speed={0.6}
+          scale={1.6}
+        />
+        <Blob
+          position={[4.2, -1.2, -3]}
+          color="#5FD4F0"
+          speed={0.5}
+          scale={1.1}
+        />
+        <Blob
+          position={[2, 2.6, -5]}
+          color="#0A1F44"
+          speed={0.4}
+          scale={2.2}
+        />
+        <Particles count={350} />
+      </group>
+    </>
+  )
+}
+
+export default function HeroBackground({ active }) {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 300)
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     <div
@@ -146,30 +176,7 @@ export default function HeroBackground({ active }) {
         camera={{ position: [0, 0, 7], fov: 55 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 8, 5]} intensity={1.2} />
-        <pointLight position={[-5, -4, 2]} intensity={1} color="#1E6FEB" />
-        <group ref={groupRef}>
-          <Blob
-            position={[-4, 0.5, -2]}
-            color="#1E6FEB"
-            speed={0.6}
-            scale={1.6}
-          />
-          <Blob
-            position={[4.2, -1.2, -3]}
-            color="#5FD4F0"
-            speed={0.5}
-            scale={1.1}
-          />
-          <Blob
-            position={[2, 2.6, -5]}
-            color="#0A1F44"
-            speed={0.4}
-            scale={2.2}
-          />
-          <Particles count={350} />
-        </group>
+        <Scene active={active} />
       </Canvas>
 
       {/* Gradient overlays to blend 3D with page background */}
